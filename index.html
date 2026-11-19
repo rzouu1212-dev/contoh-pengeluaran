@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catatan Pengeluaran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F5; --surface:#FFFFFF; --ink:#16233B; --muted:#5B6B82; --line:#D5DDE8;
+  --accent:#2F44D0; --danger:#C0392B; --ok:#1B7F5C;
+  --c1:#2F44D0; --c2:#14A39A; --c3:#E0A100; --c4:#8A4FD6; --c5:#E2557A; --c6:#3C9BE0; --c7:#7C8798;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1624; --surface:#18223A; --ink:#E8EDF7; --muted:#97A5BD; --line:#2A3752;
+    --accent:#7C8CFF; --danger:#FF7A6B; --ok:#4CD6A0;
+    --c1:#7C8CFF; --c2:#3FD0C5; --c3:#F2C23C; --c4:#B58AF2; --c5:#FF86A4; --c6:#6FBDF5; --c7:#9AA6BA; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1624; --surface:#18223A; --ink:#E8EDF7; --muted:#97A5BD; --line:#2A3752;
+  --accent:#7C8CFF; --danger:#FF7A6B; --ok:#4CD6A0;
+  --c1:#7C8CFF; --c2:#3FD0C5; --c3:#F2C23C; --c4:#B58AF2; --c5:#FF86A4; --c6:#6FBDF5; --c7:#9AA6BA; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+h1{font-size:1.5rem;font-weight:800;margin:0;letter-spacing:-.02em}
+h2{font-size:1.05rem;font-weight:600;margin:0 0 12px}
+input,select,button{font:inherit;color:inherit}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-height:44px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{cursor:pointer;border:0;border-radius:8px;min-height:44px;padding:0 18px;background:var(--accent);color:#fff;font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#0F1624}}
+:root[data-theme="dark"] button.primary{color:#0F1624}
+button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);padding:0 12px}
+.month{display:flex;gap:8px;align-items:center}
+.month input{width:auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+/* Hero: anggaran bulan ini */
+.hero{margin-bottom:16px}
+.hero-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:flex-end}
+.big{font-size:clamp(2rem,7vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.sub{color:var(--muted);font-size:.95rem}
+.budget-edit{display:flex;gap:8px;align-items:center}
+.budget-edit input{width:150px}
+.meter{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--bg);border:1px solid var(--line);margin:18px 0 8px}
+.meter span{display:block;height:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.stat b{display:block;font-size:1.15rem;font-weight:600}
+.stat small{color:var(--muted)}
+.over{color:var(--danger)} .good{color:var(--ok)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:860px){.grid{grid-template-columns:340px 1fr;align-items:start}}
+form{display:grid;gap:10px}
+label{font-size:.9rem;color:var(--muted);display:grid;gap:4px}
+.cat-row{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:7px 0}
+.dot{width:12px;height:12px;border-radius:3px}
+.cat-bar{grid-column:2 / 4;height:5px;border-radius:3px;background:var(--bg);overflow:hidden}
+.cat-bar i{display:block;height:100%}
+.list{list-style:none;margin:0;padding:0}
+.item{display:grid;grid-template-columns:12px 1fr auto auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .d{font-size:.85rem;color:var(--muted)}
+.item .t{overflow-wrap:anywhere}
+.amt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.x{min-height:36px;min-width:36px;padding:0;background:transparent;color:var(--muted);font-size:1.2rem;border-radius:6px}
+.x:hover{color:var(--danger)}
+.empty{color:var(--muted);padding:8px 0}
+.stack{display:grid;gap:16px}
+@media (max-width:480px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/3}}
+@media (prefers-reduced-motion:no-preference){.meter span{transition:width .35s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Catatan Pengeluaran</h1>
+    <div class="month">
+      <button class="ghost" id="prev" aria-label="Bulan sebelumnya">‹</button>
+      <input type="month" id="month" aria-label="Pilih bulan">
+      <button class="ghost" id="next" aria-label="Bulan berikutnya">›</button>
+    </div>
+  <button class="ghost" id="switch" hidden>Ganti tim</button>
+  </header>
+  <div class="sub" id="status" role="status" style="margin:-8px 0 12px"></div>
+  <section class="panel" id="join" hidden style="margin-bottom:16px">
+    <h2>Masuk ke catatan tim</h2>
+    <form id="joinForm">
+      <label>Kode tim (minimal 8 huruf atau angka, rahasiakan) <input id="team" autocomplete="off" required></label>
+      <label>Nama kamu <input id="who" maxlength="20" required></label>
+      <button type="submit" class="primary">Masuk</button>
+    </form>
+  </section>
+
+  <section class="panel hero" aria-live="polite">
+    <div class="hero-top">
+      <div>
+        <div class="sub" id="heroLabel">Terpakai bulan ini</div>
+        <div class="big" id="total">Rp0</div>
+      </div>
+      <label class="budget-edit">Anggaran bulanan
+        <input type="text" inputmode="numeric" id="budget" aria-label="Anggaran bulanan dalam rupiah">
+      </label>
+    </div>
+    <div class="meter" id="meter" role="img" aria-label="Pemakaian anggaran per kategori"></div>
+    <div class="sub" id="meterText"></div>
+    <div class="stats">
+      <div class="stat"><b id="sisa">–</b><small>Sisa anggaran</small></div>
+      <div class="stat"><b id="avg">–</b><small>Rata-rata per hari</small></div>
+      <div class="stat"><b id="count">0</b><small>Jumlah transaksi</small></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="stack">
+      <section class="panel">
+        <h2>Catat pengeluaran</h2>
+        <form id="form">
+          <label>Tanggal <input type="date" id="date" required></label>
+          <label>Kategori <select id="cat"></select></label>
+          <label>Keterangan <input type="text" id="note" placeholder="Contoh: makan siang" maxlength="80" required></label>
+          <label>Jumlah (Rp) <input type="text" inputmode="numeric" id="amount" placeholder="25.000" required></label>
+          <button type="submit" class="primary">Simpan pengeluaran</button>
+        </form>
+      </section>
+      <section class="panel">
+        <h2>Per kategori</h2>
+        <div id="cats"></div>
+      </section>
+    </div>
+    <section class="panel">
+      <h2>Riwayat transaksi</h2>
+      <ul class="list" id="list"></ul>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getFirestore,doc,collection,onSnapshot,setDoc,deleteDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+const CATS=[["Makanan","--c1"],["Transportasi","--c2"],["Belanja","--c3"],["Tagihan","--c4"],["Hiburan","--c5"],["Kesehatan","--c6"],["Lainnya","--c7"]];
+const rp=n=>"Rp"+Math.round(n).toLocaleString("id-ID");
+const num=s=>parseInt(String(s).replace(/\D/g,""),10)||0;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+const KEY="pengeluaran-v1";
+let state={budget:3000000,items:[]};
+let mode="lokal",dbx=null,meName="",budgetTimer=null;
+try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(p&&Array.isArray(p.items))state=p;}}catch(e){}
+function save(){if(mode!=="lokal")return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function setStatus(t){$("status").textContent=t||"";}
+const newId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,"0");
+const today=new Date();
+const todayStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+let month=todayStr.slice(0,7);
+
+$("cat").innerHTML=CATS.map(c=>`<option>${c[0]}</option>`).join("");
+$("date").value=todayStr;
+$("month").value=month;
+$("budget").value=state.budget.toLocaleString("id-ID");
+
+function shift(d){const [y,m]=month.split("-").map(Number);const dt=new Date(y,m-1+d,1);month=`${dt.getFullYear()}-${pad(dt.getMonth()+1)}`;$("month").value=month;render();}
+$("prev").onclick=()=>shift(-1);$("next").onclick=()=>shift(1);
+$("month").onchange=e=>{if(e.target.value){month=e.target.value;render();}};
+$("budget").oninput=e=>{const v=num(e.target.value);e.target.value=v?v.toLocaleString("id-ID"):"";state.budget=v;save();render();
+  if(mode==="bersama"){clearTimeout(budgetTimer);budgetTimer=setTimeout(()=>dbx.doc("settings/main").set({budget:v}).catch(()=>setStatus("Anggaran tidak bisa disimpan. Periksa koneksi dan aturan database.")),600);}};
+$("amount").oninput=e=>{const v=num(e.target.value);e.target.value=v?v.toLocaleString("id-ID"):"";};
+$("form").onsubmit=e=>{
+  e.preventDefault();
+  const amount=num($("amount").value);
+  if(!amount)return;
+  const item={date:$("date").value,cat:$("cat").value,note:$("note").value.trim(),amount};
+  if(mode==="bersama"){
+    dbx.doc("expenses/"+newId()).set({...item,by:meName}).catch(()=>setStatus("Tidak bisa menyimpan. Periksa koneksi dan aturan database."));
+  }else{state.items.push({id:newId(),...item});save();}
+  month=$("date").value.slice(0,7);$("month").value=month;
+  $("note").value="";$("amount").value="";$("note").focus();
+  render();
+};
+$("list").onclick=e=>{
+  const b=e.target.closest("[data-del]");if(!b)return;
+  const id=b.dataset.del;
+  if(mode==="bersama"){dbx.doc("expenses/"+id).delete().catch(()=>setStatus("Tidak bisa menghapus. Periksa koneksi dan aturan database."));}
+  else{state.items=state.items.filter(i=>String(i.id)!==id);save();render();}
+};
+
+function render(){
+  const items=state.items.filter(i=>i.date.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const total=items.reduce((s,i)=>s+i.amount,0);
+  const by={};CATS.forEach(c=>by[c[0]]=0);items.forEach(i=>by[i.cat]=(by[i.cat]||0)+i.amount);
+  const budget=state.budget;
+  const [y,m]=month.split("-").map(Number);
+  const dim=new Date(y,m,0).getDate();
+  const isCur=month===todayStr.slice(0,7);
+  const elapsed=isCur?today.getDate():(month<todayStr.slice(0,7)?dim:0);
+
+  $("heroLabel").textContent=isCur?"Terpakai bulan ini":"Terpakai pada "+new Date(y,m-1,1).toLocaleDateString("id-ID",{month:"long",year:"numeric"});
+  $("total").textContent=rp(total);
+  $("count").textContent=items.length;
+
+  const denom=Math.max(budget,total,1);
+  $("meter").innerHTML=CATS.filter(c=>by[c[0]]>0).map(c=>`<span style="width:${by[c[0]]/denom*100}%;background:var(${c[1]})" title="${c[0]}: ${rp(by[c[0]])}"></span>`).join("");
+
+  const sisa=budget-total;
+  const pct=budget?Math.round(total/budget*100):0;
+  $("meterText").textContent=budget?`${pct}% dari anggaran ${rp(budget)}`:"Isi anggaran bulanan untuk melihat sisa.";
+  $("sisa").textContent=budget?(sisa>=0?rp(sisa):"Lebih "+rp(-sisa)):"–";
+  $("sisa").className=budget?(sisa>=0?"good":"over"):"";
+  $("avg").textContent=elapsed&&total?rp(total/elapsed):"–";
+
+  const max=Math.max(...Object.values(by),1);
+  const rows=CATS.filter(c=>by[c[0]]>0).sort((a,b)=>by[b[0]]-by[a[0]]);
+  $("cats").innerHTML=rows.length?rows.map(c=>`<div class="cat-row"><span class="dot" style="background:var(${c[1]})"></span><span>${c[0]}</span><span class="amt">${rp(by[c[0]])}</span><div class="cat-bar"><i style="width:${by[c[0]]/max*100}%;background:var(${c[1]})"></i></div></div>`).join(""):`<div class="empty">Belum ada data bulan ini.</div>`;
+
+  const colorOf=n=>(CATS.find(c=>c[0]===n)||CATS[6])[1];
+  $("list").innerHTML=items.length?items.map(i=>{
+    const d=new Date(i.date+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short"});
+    return `<li class="item"><span class="dot" style="background:var(${colorOf(i.cat)})"></span><div><div class="t">${esc(i.note)}</div><div class="d">${d} · ${esc(i.cat)}${i.by?" · "+esc(i.by):""}</div></div><span class="amt">${rp(i.amount)}</span><button class="x" data-del="${i.id}" aria-label="Hapus transaksi">×</button></li>`;
+  }).join(""):`<li class="empty">Belum ada transaksi. Catat pengeluaran pertamamu di formulir.</li>`;
+}
+render();
+const firebaseConfig={apiKey:"AIzaSyCUkbNHXb0DmhPKBqQ6P5kIFraglyZJ-iY",authDomain:"pengeluaran-tim.firebaseapp.com",projectId:"pengeluaran-tim",appId:"1:205120671596:web:25a0940d69b6a87f6b6d49"};
+const configured=!firebaseConfig.apiKey.startsWith("ISI_");
+let fs=null,unsubs=[];
+function start(team,name){
+  unsubs.forEach(f=>f());unsubs=[];
+  mode="bersama";meName=name;state.items=[];render();
+  const t=setTimeout(()=>setStatus("Data tim belum bisa dijangkau. Tampilan mungkin belum terbaru."),10000);
+  const fail=()=>{clearTimeout(t);setStatus("Data tim tidak bisa dimuat. Periksa kode tim, koneksi, dan aturan database.");};
+  dbx={doc:p=>{const r=doc(fs,"teams",team,...p.split("/"));return{set:d=>setDoc(r,d),delete:()=>deleteDoc(r)};}};
+  unsubs.push(onSnapshot(collection(fs,"teams",team,"expenses"),s=>{clearTimeout(t);setStatus("Tim aktif · sebagai "+name);state.items=s.docs.map(d=>({id:d.id,...d.data()}));render();},fail));
+  unsubs.push(onSnapshot(doc(fs,"teams",team,"settings","main"),s=>{const d=s.exists()&&s.data();if(d&&typeof d.budget==="number"){state.budget=d.budget;if(document.activeElement!==$("budget"))$("budget").value=d.budget.toLocaleString("id-ID");render();}},()=>{}));
+}
+if(!configured){setStatus("Firebase belum diisi di file ini, jadi data hanya tersimpan di perangkat ini.");}
+else{
+  fs=getFirestore(initializeApp(firebaseConfig));
+  const TK="tim-v1";
+  const go=(team,name)=>{try{localStorage.setItem(TK,JSON.stringify({team,name}));}catch(e){}$("join").hidden=true;$("switch").hidden=false;start(team,name);};
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(TK));}catch(e){}
+  if(saved&&saved.team&&saved.name)go(saved.team,saved.name);else $("join").hidden=false;
+  $("joinForm").onsubmit=e=>{e.preventDefault();const team=$("team").value.toLowerCase().replace(/[^a-z0-9-]/g,"");const name=$("who").value.trim();if(team.length<8){setStatus("Kode tim minimal 8 huruf atau angka.");return;}go(team,name);};
+  $("switch").onclick=()=>{$("join").hidden=false;};
+}
+</script>
+</body>
+</html>
